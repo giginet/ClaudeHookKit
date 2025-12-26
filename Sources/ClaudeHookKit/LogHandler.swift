@@ -2,6 +2,17 @@ import Foundation
 import Logging
 
 struct FileLogHandler: LogHandler {
+    enum Error: LocalizedError {
+        case failedToOpenFile(String)
+
+        var errorDescription: String? {
+            switch self {
+            case .failedToOpenFile(let path):
+                return "Failed to open log file: \(path)"
+            }
+        }
+    }
+
     private let fileHandle: FileHandle
     var logLevel: Logger.Level = .debug
     var metadata: Logger.Metadata = [:]
@@ -11,16 +22,16 @@ struct FileLogHandler: LogHandler {
         set { metadata[key] = newValue }
     }
 
-    init?(filePath: String) {
+    init(filePath: String) throws {
         let fileManager = FileManager.default
         if !fileManager.fileExists(atPath: filePath) {
             fileManager.createFile(atPath: filePath, contents: nil)
         }
         guard let handle = FileHandle(forWritingAtPath: filePath) else {
-            return nil
+            throw Error.failedToOpenFile(filePath)
         }
         self.fileHandle = handle
-        _ = try? self.fileHandle.seekToEnd()
+        try self.fileHandle.seekToEnd()
     }
 
     func log(

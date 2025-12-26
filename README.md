@@ -36,7 +36,7 @@ struct NotificationSoundPlayer: NotificationHook {
         task.arguments = ["/System/Library/Sounds/Glass.aiff"]
         try? task.run()
 
-        return .simple(.success)
+        return .exitCode(.success)
     }
 }
 
@@ -66,7 +66,7 @@ struct DangerousCommandBlocker: PreToolUseHook {
 
         for dangerous in dangerousCommands {
             if input.toolInput.command.contains(dangerous) {
-                return .advanced(
+                return .jsonOutput(
                     PreToolUseOutput(
                         hookSpecificOutput: .init(
                             permissionDecision: .deny,
@@ -78,7 +78,7 @@ struct DangerousCommandBlocker: PreToolUseHook {
             }
         }
 
-        return .simple(.success)
+        return .exitCode(.success)
     }
 }
 
@@ -112,7 +112,7 @@ struct DocumentationAutoApprover: PreToolUseHook {
         // Check if file is a documentation file
         for ext in documentationExtensions {
             if input.toolInput.filePath.hasSuffix(ext) {
-                return .advanced(
+                return .jsonOutput(
                     PreToolUseOutput(
                         suppressOutput: true,
                         hookSpecificOutput: .init(
@@ -126,7 +126,7 @@ struct DocumentationAutoApprover: PreToolUseHook {
         }
 
         // Let the normal permission flow proceed
-        return .simple(.success)
+        return .exitCode(.success)
     }
 }
 
@@ -157,20 +157,20 @@ ClaudeHookKit supports all Claude Code hook events:
 
 Hooks can return two types of results. See [Hook Output](https://code.claude.com/docs/en/hooks#hook-output) section.
 
-#### Simple Results
+#### Exit Code Results
 
 ```swift
-return .simple(.success)           // Exit with success (exit code 0)
-return .simple(.blockingError)     // Block the action (exit code 2)
-return .simple(.nonBlockingError(1)) // Non-blocking error with custom exit code
+return .exitCode(.success)           // Exit with success (exit code 0)
+return .exitCode(.blockingError)     // Block the action (exit code 2)
+return .exitCode(.nonBlockingError(1)) // Non-blocking error with custom exit code
 ```
 
-#### Advanced Results
+#### JSON Output Results
 
 For hooks that need to return structured output:
 
 ```swift
-return .advanced(
+return .jsonOutput(
     PreToolUseOutput(
         hookSpecificOutput: .init(
             permissionDecision: .deny,
@@ -196,7 +196,7 @@ func invoke(input: Input, context: Context) -> HookResult<Output> {
     // Log a message
     context.logger.debug("Hook invoked with input: \(input)")
 
-    return .simple(.success)
+    return .exitCode(.success)
 }
 ```
 
@@ -219,7 +219,7 @@ func invoke(input: Input, context: Context) -> HookResult<Output> {
     // Use the logger
     context.logger.debug("Processing hook...")
 
-    return .simple(.success)
+    return .exitCode(.success)
 }
 ```
 

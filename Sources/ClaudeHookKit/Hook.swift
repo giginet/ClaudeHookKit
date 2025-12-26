@@ -2,13 +2,13 @@ import Foundation
 import Logging
 
 public enum HookResult<Output: StdoutOutput> {
-    public enum SimpleHookStatus {
+    public enum ExitCodeStatus {
         case success
         case blockingError
         case nonBlockingError(exitCode: Int32)
     }
-    case simple(SimpleHookStatus)
-    case advanced(Output)
+    case exitCode(ExitCodeStatus)
+    case jsonOutput(Output)
 }
 
 public protocol Hook {

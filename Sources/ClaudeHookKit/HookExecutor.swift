@@ -34,10 +34,11 @@ struct HookExecutor<H: Hook> {
         case .enabled(let logFileURL):
             let logFilePath = logFileURL.path()
             LoggingSystem.bootstrap { _ -> LogHandler in
-                if let handler = FileLogHandler(filePath: logFilePath) {
-                    return handler
+                do {
+                    return try FileLogHandler(filePath: logFilePath)
+                } catch {
+                    fatalError("Failed to initialize FileLogHandler: \(error)")
                 }
-                return NoOpLogHandler()
             }
         }
         var logger = Logger(label: "me.giginet.ClaudeHookKit")
@@ -79,17 +80,17 @@ struct HookExecutor<H: Hook> {
 
     private func handleHookResult(_ hookResult: HookResult<H.Output>, logger: Logger) throws {
         switch hookResult {
-        case .simple(.success):
+        case .exitCode(.success):
             exit(EXIT_SUCCESS)
-        case .simple(.blockingError):
+        case .exitCode(.blockingError):
             exit(blockingErrorExitCode)
-        case .simple(.nonBlockingError(let exitCode)):
+        case .exitCode(.nonBlockingError(let exitCode)):
             if exitCode == blockingErrorExitCode {
                 fatalError(
                     "nonBlockingError can't return 2 as exit code. Use blockingError instead.")
             }
             exit(exitCode)
-        case .advanced(let payload):
+        case .jsonOutput(let payload):
             let stdoutHandler = FileHandle.standardOutput
             defer { try? stdoutHandler.close() }
             let outputData = try jsonEncoder.encode(payload)
