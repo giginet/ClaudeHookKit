@@ -1,16 +1,29 @@
 import Foundation
 
-public enum HookError<Output: StdoutOutput>: Error {
-    case blockingError(Output?)
-    case nonBlockingError(exitCode: Int32, Output?)
+public struct HookResult<Output: StdoutOutput>: Sendable {
+    public enum Status: Sendable {
+        case success
+        case blockingError
+        case nonBlockingError(exitCode: Int32)
+    }
+    public let status: Status
+    public let payload: Output?
+    
+    public init(status: Status, payload: Output? = nil) {
+        self.status = status
+        self.payload = payload
+    }
 }
 
 public protocol Hook {
     associatedtype Input: StdinInput
     associatedtype Output: StdoutOutput
     
-    func invoke(input: Input) throws(HookError<Output>)
+    func invoke(input: Input) -> HookResult<Output>
 }
+
+public struct NeverToolInput: ToolInput { }
+public struct NeverToolResponse: ToolResponse { }
 
 public protocol PreToolUseHook: Hook
 where Input == PreToolUseInput<HookToolInput>,
@@ -54,4 +67,7 @@ where Input == SessionStartInput,
 public protocol SessionEndHook: Hook
 where Input == SessionEndInput,
       Output == SessionEndOutput {
+}
+
+extension Never: ToolInput, ToolResponse, UpdatedInput {
 }
