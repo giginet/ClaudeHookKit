@@ -1,18 +1,13 @@
 import Foundation
 
-public struct HookResult<Output: StdoutOutput>: Sendable {
-    public enum Status: Sendable {
+public enum HookResult<Output: StdoutOutput> {
+    public enum SimpleHookStatus {
         case success
         case blockingError
         case nonBlockingError(exitCode: Int32)
     }
-    public let status: Status
-    public let payload: Output?
-    
-    public init(status: Status, payload: Output? = nil) {
-        self.status = status
-        self.payload = payload
-    }
+    case simple(SimpleHookStatus)
+    case advanced(Output)
 }
 
 public protocol Hook {

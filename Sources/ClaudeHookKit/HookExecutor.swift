@@ -43,25 +43,26 @@ struct HookExecutor<H: Hook> {
             throw Error.invalidInput(error, inputString)
         }
         
-        let stdoutHandler = FileHandle.standardOutput
-        defer { try? stdoutHandler.close() }
-        
         let outputResult = hook.invoke(input: input)
-        if let payload = outputResult.payload {
-            let outputData = try jsonEncoder.encode(outputResult.payload)
-            stdoutHandler.write(outputData)
-        }
-        
-        switch outputResult.status {
-        case .success:
+        try handleHookResult(outputResult)
+    }
+    
+    private func handleHookResult(_ hookResult: HookResult<H.Output>) throws {
+        switch hookResult {
+        case .simple(.success):
             exit(EXIT_SUCCESS)
-        case .blockingError:
+        case .simple(.blockingError):
             exit(blockingErrorExitCode)
-        case .nonBlockingError(let exitCode):
+        case .simple(.nonBlockingError(let exitCode)):
             if exitCode == blockingErrorExitCode {
                 fatalError("nonBlockingError can't return 2 as exit code. Use blockingError instead.")
             }
             exit(exitCode)
+        case .advanced(let payload):
+            let stdoutHandler = FileHandle.standardOutput
+            defer { try? stdoutHandler.close() }
+            let outputData = try jsonEncoder.encode(payload)
+            stdoutHandler.write(outputData)
         }
     }
 }
