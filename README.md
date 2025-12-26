@@ -7,7 +7,7 @@
 ![Platforms](https://img.shields.io/badge/Platform-macOS-lightgray?logo=apple&style=flat-square)
 [![License](https://img.shields.io/badge/License-MIT-darkgray?style=flat-square)](https://github.com/giginet/ClaudeHookKit/blob/main/LICENSE.md)
 
-A Swift framework for building [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) with type-safe APIs.
+A Swift framework for building [Claude Code Hooks](https://code.claude.com/docs/en/hooks) with type-safe APIs.
 
 ## Overview
 
