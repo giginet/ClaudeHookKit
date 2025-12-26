@@ -76,7 +76,7 @@ public struct Context {
         return URL(filePath: projectDirString)
     }
     
-    public func printErrorToUser(_ message: String) {
+    public func writeToStandardError(_ message: String) {
         let handler = FileHandle.standardError
         if let data = message.data(using: .utf8) {
             handler.write(data)
