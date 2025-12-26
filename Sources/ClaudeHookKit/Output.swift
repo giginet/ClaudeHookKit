@@ -7,8 +7,7 @@ public protocol StdoutOutput: Encodable {
     var systemMessage: String { get }
 }
 
-public protocol UpdatedInput: Encodable {
-}
+public protocol UpdatedInput: Encodable { }
 
 public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
     public enum PermissionDecision: Encodable {
@@ -17,32 +16,30 @@ public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
         case ask
     }
     
+    public struct HookSpecificOutput: Encodable {
+        public var hookEventName: Event
+        public var permissionDecision: PermissionDecision
+        public var permissionDecisionReason: String
+        public var updatedInput: Input
+    }
+    
     public var `continue`: Bool
     public var stopReason: String
     public var suppressOutput: Bool
     public var systemMessage: String
-    public var hookEventName: Event
-    public var permissionDecision: PermissionDecision
-    public var permissionDecisionReason: String
-    public var updatedInput: Input
+    public var hookSpecificOutput: HookSpecificOutput
     
     public init(
-        continue: Bool,
+        continue: Bool = true,
         stopReason: String,
-        suppressOutput: Bool,
+        suppressOutput: Bool = true,
         systemMessage: String,
-        hookEventName: Event,
-        permissionDecision: PermissionDecision,
-        permissionDecisionReason: String,
-        updatedInput: Input
+        hookSpecificOutput: HookSpecificOutput
     ) {
         self.continue = `continue`
         self.stopReason = stopReason
         self.suppressOutput = suppressOutput
         self.systemMessage = systemMessage
-        self.hookEventName = hookEventName
-        self.permissionDecision = permissionDecision
-        self.permissionDecisionReason = permissionDecisionReason
-        self.updatedInput = updatedInput
+        self.hookSpecificOutput = hookSpecificOutput
     }
 }
