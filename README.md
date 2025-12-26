@@ -1,0 +1,189 @@
+# ClaudeHookKit
+
+A Swift framework for building [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) with type-safe APIs.
+
+## Overview
+
+ClaudeHookKit provides a type-safe way to implement Claude Code hooks in Swift. It handles JSON serialization/deserialization, input validation, and output formatting, allowing you to focus on your hook logic.
+
+## Requirements
+
+- Swift 6.2+
+- macOS 14+
+
+## Usage
+
+### Basic Example
+
+Here's a simple example of a `Notification` hook that plays a sound when Claude Code sends a notification:
+
+```swift
+import ClaudeHookKit
+import Foundation
+
+struct NotificationSoundPlayer: NotificationHook {
+    func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+        // Play the default system sound
+        let task = Process()
+        task.executableURL = URL(filePath: "/usr/bin/afplay")
+        task.arguments = ["/System/Library/Sounds/Glass.aiff"]
+        try? task.run()
+
+        return .simple(.success)
+    }
+}
+
+@main
+struct Main {
+    static func main() throws {
+        try NotificationSoundPlayer().run()
+    }
+}
+```
+
+### Use ToolInput struct
+
+You can define custom `ToolInput` structs to represent the input for specific tools. Here's an example of a hook that blocks dangerous bash commands:
+
+```swift
+import ClaudeHookKit
+
+struct BashToolInput: ToolInput {
+    let command: String
+    let description: String
+}
+
+struct DangerousCommandBlocker: PreToolUseHook {
+    func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+        let dangerousCommands = ["rm -rf", "sudo rm", "mkfs", "> /dev/"]
+
+        for dangerous in dangerousCommands {
+            if input.toolInput.command.contains(dangerous) 
+                return .advanced(
+                    PreToolUseOutput(
+                        decision: .block,
+                        reason: "Blocked dangerous command: \(dangerous)"
+                    )
+                )
+            }
+        }
+
+        return .simple(.success)
+    }
+}
+
+@main
+struct Main {
+    static func main() throws {
+        try DangerousCommandBlocker().run()
+    }
+}
+```
+
+### Supported Hook Types
+
+ClaudeHookKit supports all Claude Code hook events:
+
+| Hook Protocol | Event | Description |
+|---------------|-------|-------------|
+| `PreToolUseHook` | `PreToolUse` | Called before a tool is executed |
+| `PostToolUseHook` | `PostToolUse` | Called after a tool is executed |
+| `NotificationHook` | `Notification` | Called when Claude Code sends a notification |
+| `UserPromptSubmitHook` | `UserPromptSubmit` | Called when the user submits a prompt |
+| `StopHook` | `Stop` | Called when Claude Code stops |
+| `SubagentStopHook` | `SubagentStop` | Called when a subagent stops |
+| `SessionStartHook` | `SessionStart` | Called when a session starts |
+| `SessionEndHook` | `SessionEnd` | Called when a session ends |
+
+### Hook Results
+
+Hooks can return two types of results. See [Hook Output](https://code.claude.com/docs/en/hooks#hook-output) section.
+
+#### Simple Results
+
+```swift
+return .simple(.success)           // Exit with success (exit code 0)
+return .simple(.blockingError)     // Block the action (exit code 2)
+return .simple(.nonBlockingError(1)) // Non-blocking error with custom exit code
+```
+
+#### Advanced Results
+
+For hooks that need to return structured output:
+
+```swift
+return .advanced(
+    PreToolUseOutput(
+        decision: .block,
+        reason: "Reason for blocking"
+    )
+)
+```
+
+### Debug and Logging
+
+ClaudeHookKit supports file-based logging for debugging. You can check hook inputs easily. By default, logging is disabled.
+
+```swift
+let logURL = URL(filePath: "/path/to/.claude-hook-kit.log")
+try myHook.run(logMode: .enabled(logURL))
+```
+
+
+```swift
+func invoke(input: Input, context: Context) -> HookResult<Output> {
+    // Log a message
+    context.logger.debug("Hook invoked with input: \(input)")
+
+    return .simple(.success)
+}
+```
+
+> [!WARNING]
+> Do not use `print` to output logs, as it may interfere with the hook's JSON output. Use the provided logger instead.
+
+You can also use the standard debug logger of Claude Code. See [Debugging](https://code.claude.com/docs/en/hooks#debugging) section of the official documentation.
+
+### Context
+
+The `Context` object provides access to environment information:
+
+```swift
+func invoke(input: Input, context: Context) -> HookResult<Output> {
+    // Access the project directory
+    if let projectDir = context.projectDirectoryPath {
+        // ...
+    }
+
+    // Use the logger
+    context.logger.debug("Processing hook...")
+
+    return .simple(.success)
+}
+```
+
+### Configuring Hooks in Claude Code
+
+After building your hook executable, configure it in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/your/hook"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## License
+
+MIT License
