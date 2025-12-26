@@ -29,7 +29,7 @@ public enum SessionEndReason: String {
 
 // MARK: - Hook Event Name
 
-public enum HookEventName: String {
+public enum HookEvent: String {
     case preToolUse = "PreToolUse"
     case postToolUse = "PostToolUse"
     case notification = "Notification"
@@ -45,39 +45,39 @@ public enum HookEventName: String {
 public protocol StdinInput {
     var sessionID: String { get }
     var transcriptPath: URL { get }
-    var currentWorkingDirectory: URL { get }
+    var cwd: URL { get }
     var permissionMode: PermissionMode { get }
-    var hookEventName: HookEventName { get }
+    var hookEventName: HookEvent { get }
 }
-
 // MARK: - PreToolUse Input
 
+public protocol ToolInput: Decodable { }
+
 /// Input received before a tool is executed
-public struct PreToolUseInput: StdinInput {
+public struct PreToolUseInput<Input: ToolInput>: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
+    public var hookEventName: HookEvent
     public var toolName: String
-    /// Tool input as raw JSON. The schema varies depending on the tool (Write, Read, Bash, etc.)
-    public var toolInput: [String: Any]
+    public var toolInput: ToolInput
 }
 
 // MARK: - PostToolUse Input
 
+public protocol ToolResponse: Decodable { }
+
 /// Input received after a tool has completed successfully
-public struct PostToolUseInput: StdinInput {
+public struct PostToolUseInput<Input: ToolInput, Response: ToolResponse>: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
+    public var hookEventName: HookEvent
     public var toolName: String
-    /// Tool input as raw JSON. The schema varies depending on the tool.
-    public var toolInput: [String: Any]
-    /// Tool response as raw JSON. The schema varies depending on the tool.
-    public var toolResponse: [String: Any]
+    public var toolInput: ToolInput
+    public var toolResponse: ToolResponse
 }
 
 // MARK: - Notification Input
@@ -86,9 +86,9 @@ public struct PostToolUseInput: StdinInput {
 public struct NotificationInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
+    public var hookEventName: HookEvent
     public var message: String
 }
 
@@ -98,9 +98,9 @@ public struct NotificationInput: StdinInput {
 public struct UserPromptSubmitInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
+    public var hookEventName: HookEvent
     public var prompt: String
 }
 
@@ -110,10 +110,9 @@ public struct UserPromptSubmitInput: StdinInput {
 public struct StopInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
-    /// Whether a hook is already running
+    public var hookEventName: HookEvent
     public var stopHookActive: Bool
 }
 
@@ -123,10 +122,9 @@ public struct StopInput: StdinInput {
 public struct SubagentStopInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
-    /// Whether a hook is already running
+    public var hookEventName: HookEvent
     public var stopHookActive: Bool
 }
 
@@ -136,10 +134,9 @@ public struct SubagentStopInput: StdinInput {
 public struct SessionStartInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
-    /// The source of the session start
+    public var hookEventName: HookEvent
     public var source: SessionStartSource
 }
 
@@ -149,9 +146,8 @@ public struct SessionStartInput: StdinInput {
 public struct SessionEndInput: StdinInput {
     public var sessionID: String
     public var transcriptPath: URL
-    public var currentWorkingDirectory: URL
+    public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEventName
-    /// The reason the session ended
+    public var hookEventName: HookEvent
     public var reason: SessionEndReason
 }
