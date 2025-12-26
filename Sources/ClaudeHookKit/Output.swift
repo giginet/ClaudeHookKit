@@ -10,7 +10,7 @@ public protocol StdoutOutput: Encodable, Sendable {
 public protocol UpdatedInput: Encodable, Sendable { }
 
 public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
-    public enum PermissionDecision: Encodable, Sendable {
+    public enum PermissionDecision: String, Encodable, Sendable {
         case allow
         case deny
         case ask

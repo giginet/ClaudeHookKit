@@ -4,12 +4,7 @@ private let blockingErrorExitCode: Int32 = 2
 
 struct HookExecutor<H: Hook> {
     private let jsonDecoder: JSONDecoder = JSONDecoder()
-    
-    private var jsonEncoder: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        return encoder
-    }
+    private let jsonEncoder: JSONEncoder = JSONEncoder()
     
     enum Error: LocalizedError {
         case invalidInput(Swift.Error, String)

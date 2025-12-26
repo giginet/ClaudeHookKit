@@ -64,5 +64,5 @@ where Input == SessionEndInput,
       Output == SessionEndOutput {
 }
 
-extension Never: ToolInput, ToolResponse, UpdatedInput {
+public struct Empty: ToolInput, ToolResponse, UpdatedInput {
 }

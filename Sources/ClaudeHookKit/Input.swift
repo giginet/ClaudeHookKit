@@ -38,7 +38,7 @@ public struct PreToolUseInput<Input: ToolInput>: StdinInput {
     public var permissionMode: PermissionMode
     public var hookEventName: Event
     public var toolName: String
-    public var toolInput: Input
+    public var toolInput: Input?
 
     private enum CodingKeys: String, CodingKey {
         case sessionID = "session_id"
@@ -60,8 +60,8 @@ public struct PostToolUseInput<Input: ToolInput, Response: ToolResponse>: StdinI
     public var permissionMode: PermissionMode
     public var hookEventName: Event
     public var toolName: String
-    public var toolInput: Input
-    public var toolResponse: Response
+    public var toolInput: Input?
+    public var toolResponse: Response?
 
     private enum CodingKeys: String, CodingKey {
         case sessionID = "session_id"
