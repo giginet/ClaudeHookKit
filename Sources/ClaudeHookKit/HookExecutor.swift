@@ -1,8 +1,10 @@
 import Foundation
+import Logging
 
 private let blockingErrorExitCode: Int32 = 2
 
 struct HookExecutor<H: Hook> {
+    private let logger: Logger
     private let jsonDecoder: JSONDecoder = JSONDecoder()
     private let jsonEncoder: JSONEncoder = JSONEncoder()
     
@@ -20,6 +22,13 @@ struct HookExecutor<H: Hook> {
         }
     }
     
+    init(logLevel: Logger.Level) {
+        LoggingSystem.bootstrap(StreamLogHandler.standardError)
+        var logger = Logger(label: "me.giginet.ClaudeHookKit")
+        logger.logLevel = logLevel
+        self.logger = logger
+    }
+    
     func execute(hook: H) throws {
         let inputHandler = FileHandle.standardInput
         let isTTY = isatty(STDIN_FILENO) != 0
@@ -30,6 +39,10 @@ struct HookExecutor<H: Hook> {
         
         try inputHandler.close()
         
+        if let payloadString = String(data: payloadData, encoding: .utf8) {
+            logger.debug("Received payload: \(payloadString)")
+        }
+        
         let input: H.Input
         do {
             input = try jsonDecoder.decode(H.Input.self, from: payloadData)
@@ -38,12 +51,12 @@ struct HookExecutor<H: Hook> {
             throw Error.invalidInput(error, inputString)
         }
         
-        let context = Context()
+        let context = Context(logger: logger)
         let outputResult = hook.invoke(input: input, context: context)
-        try handleHookResult(outputResult)
+        try handleHookResult(outputResult, logger: logger)
     }
     
-    private func handleHookResult(_ hookResult: HookResult<H.Output>) throws {
+    private func handleHookResult(_ hookResult: HookResult<H.Output>, logger: Logger) throws {
         switch hookResult {
         case .simple(.success):
             exit(EXIT_SUCCESS)
@@ -58,31 +71,34 @@ struct HookExecutor<H: Hook> {
             let stdoutHandler = FileHandle.standardOutput
             defer { try? stdoutHandler.close() }
             let outputData = try jsonEncoder.encode(payload)
+            
+            if let outputDataString = String(data: outputData, encoding: .utf8) {
+                logger.debug("Sending output payload: \(outputDataString)")
+            }
+            
             stdoutHandler.write(outputData)
         }
     }
 }
 
 public struct Context {
+    public let logger: Logger
+    
+    init(logger: Logger) {
+        self.logger = logger
+    }
+    
     public var projectDirectoryPath: URL? {
         guard let projectDirString = ProcessInfo.processInfo.environment["CLAUDE_PROJECT_DIR"] else {
             return nil
         }
         return URL(filePath: projectDirString)
     }
-    
-    public func writeToStandardError(_ message: String) {
-        let handler = FileHandle.standardError
-        if let data = message.data(using: .utf8) {
-            handler.write(data)
-        }
-        handler.closeFile()
-    }
 }
 
 extension Hook {
-    public func run() throws {
-        let executor = HookExecutor<Self>()
+    public func run(isVerbose: Bool = false) throws {
+        let executor = HookExecutor<Self>(logLevel: isVerbose ? .debug : .info)
         try executor.execute(hook: self)
     }
 }

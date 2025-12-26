@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 
 public enum HookResult<Output: StdoutOutput> {
     public enum SimpleHookStatus {
@@ -15,6 +16,12 @@ public protocol Hook {
     associatedtype Output: StdoutOutput
     
     func invoke(input: Input, context: Context) -> HookResult<Output>
+}
+
+extension Hook {
+    public var logLevel: Logger.Level {
+        .info
+    }
 }
 
 public struct NeverToolInput: ToolInput { }
