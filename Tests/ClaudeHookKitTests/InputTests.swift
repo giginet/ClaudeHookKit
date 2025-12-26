@@ -25,7 +25,7 @@ struct InputTests {
         #expect(input.sessionID == UUID(uuidString: "2c0c9028-4e2a-457a-93fd-9f6309d64701"))
         #expect(
             input.transcriptPath.path()
-                == "/path/to/workspace/2c0c9028-4e2a-457a-93fd-9f6309d64701.jsonl"
+                == "/path/to/.claude/projects/workspace/2c0c9028-4e2a-457a-93fd-9f6309d64701.jsonl"
         )
         #expect(input.cwd.path() == "/path/to/workspace")
         #expect(input.permissionMode == .default)
