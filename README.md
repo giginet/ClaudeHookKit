@@ -65,11 +65,14 @@ struct DangerousCommandBlocker: PreToolUseHook {
         let dangerousCommands = ["rm -rf", "sudo rm", "mkfs", "> /dev/"]
 
         for dangerous in dangerousCommands {
-            if input.toolInput.command.contains(dangerous) 
+            if input.toolInput.command.contains(dangerous) {
                 return .advanced(
                     PreToolUseOutput(
-                        decision: .block,
-                        reason: "Blocked dangerous command: \(dangerous)"
+                        hookSpecificOutput: .init(
+                            permissionDecision: .deny,
+                            permissionDecisionReason: "Blocked dangerous command: \(dangerous)",
+                            updatedInput: nil
+                        )
                     )
                 )
             }
@@ -83,6 +86,54 @@ struct DangerousCommandBlocker: PreToolUseHook {
 struct Main {
     static func main() throws {
         try DangerousCommandBlocker().run()
+    }
+}
+```
+
+### Auto-approve Documentation Files
+
+Here's an example of a `PreToolUse` hook that auto-approves Read tool calls for documentation files:
+
+```swift
+import ClaudeHookKit
+
+struct ReadToolInput: ToolInput {
+    let filePath: String
+
+    enum CodingKeys: String, CodingKey {
+        case filePath = "file_path"
+    }
+}
+
+struct DocumentationAutoApprover: PreToolUseHook {
+    func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+        let documentationExtensions = [".md", ".mdx", ".txt", ".json"]
+
+        // Check if file is a documentation file
+        for ext in documentationExtensions {
+            if input.toolInput.filePath.hasSuffix(ext) {
+                return .advanced(
+                    PreToolUseOutput(
+                        suppressOutput: true,
+                        hookSpecificOutput: .init(
+                            permissionDecision: .allow,
+                            permissionDecisionReason: "Documentation file auto-approved",
+                            updatedInput: nil
+                        )
+                    )
+                )
+            }
+        }
+
+        // Let the normal permission flow proceed
+        return .simple(.success)
+    }
+}
+
+@main
+struct Main {
+    static func main() throws {
+        try DocumentationAutoApprover().run()
     }
 }
 ```
@@ -121,8 +172,11 @@ For hooks that need to return structured output:
 ```swift
 return .advanced(
     PreToolUseOutput(
-        decision: .block,
-        reason: "Reason for blocking"
+        hookSpecificOutput: .init(
+            permissionDecision: .deny,
+            permissionDecisionReason: "Reason for denying",
+            updatedInput: nil
+        )
     )
 )
 ```
