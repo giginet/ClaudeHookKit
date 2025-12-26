@@ -3,11 +3,7 @@ import Foundation
 private let blockingErrorExitCode: Int32 = 2
 
 struct HookExecutor<H: Hook> {
-    private var jsonDecoder: JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }
+    private let jsonDecoder: JSONDecoder = JSONDecoder()
     
     private var jsonEncoder: JSONEncoder {
         let encoder = JSONEncoder()
@@ -16,13 +12,13 @@ struct HookExecutor<H: Hook> {
     }
     
     enum Error: LocalizedError {
-        case invalidInput(Swift.Error)
+        case invalidInput(Swift.Error, String)
         case invalidCall
         
         var errorDescription: String? {
             switch self {
-            case .invalidInput(let inputError):
-                return "Failed to decode input: \(inputError)"
+            case .invalidInput(let inputError, let rawValue):
+                return "Failed to decode input: \(rawValue), \(inputError)"
             case .invalidCall:
                 return "Call this script from Claude Code Hooks"
             }
@@ -44,7 +40,7 @@ struct HookExecutor<H: Hook> {
             input = try jsonDecoder.decode(H.Input.self, from: payloadData)
         } catch {
             let inputString = String(data: payloadData, encoding: .utf8) ?? "<invalid data>"
-            throw Error.invalidInput(error)
+            throw Error.invalidInput(error, inputString)
         }
         
         let stdoutHandler = FileHandle.standardOutput
