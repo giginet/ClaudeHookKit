@@ -43,7 +43,8 @@ struct HookExecutor<H: Hook> {
             throw Error.invalidInput(error, inputString)
         }
         
-        let outputResult = hook.invoke(input: input)
+        let context = Context()
+        let outputResult = hook.invoke(input: input, context: context)
         try handleHookResult(outputResult)
     }
     
@@ -64,6 +65,23 @@ struct HookExecutor<H: Hook> {
             let outputData = try jsonEncoder.encode(payload)
             stdoutHandler.write(outputData)
         }
+    }
+}
+
+public struct Context {
+    public var projectDirectoryPath: URL? {
+        guard let projectDirString = ProcessInfo.processInfo.environment["CLAUDE_PROJECT_DIR"] else {
+            return nil
+        }
+        return URL(filePath: projectDirString)
+    }
+    
+    public func printErrorToUser(_ message: String) {
+        let handler = FileHandle.standardError
+        if let data = message.data(using: .utf8) {
+            handler.write(data)
+        }
+        handler.closeFile()
     }
 }
 

@@ -14,7 +14,7 @@ public protocol Hook {
     associatedtype Input: StdinInput
     associatedtype Output: StdoutOutput
     
-    func invoke(input: Input) -> HookResult<Output>
+    func invoke(input: Input, context: Context) -> HookResult<Output>
 }
 
 public struct NeverToolInput: ToolInput { }
