@@ -18,12 +18,6 @@ public protocol Hook {
     func invoke(input: Input, context: Context) -> HookResult<Output>
 }
 
-extension Hook {
-    public var logLevel: Logger.Level {
-        .info
-    }
-}
-
 public struct NeverToolInput: ToolInput { }
 public struct NeverToolResponse: ToolResponse { }
 
