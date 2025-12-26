@@ -3,15 +3,20 @@ import Logging
 
 private let blockingErrorExitCode: Int32 = 2
 
+public enum LogMode {
+    case disabled
+    case enabled(URL)
+}
+
 struct HookExecutor<H: Hook> {
     private let logger: Logger
     private let jsonDecoder: JSONDecoder = JSONDecoder()
     private let jsonEncoder: JSONEncoder = JSONEncoder()
-    
+
     enum Error: LocalizedError {
         case invalidInput(Swift.Error, String)
         case invalidCall
-        
+
         var errorDescription: String? {
             switch self {
             case .invalidInput(let inputError, let rawValue):
@@ -21,11 +26,27 @@ struct HookExecutor<H: Hook> {
             }
         }
     }
-    
-    init(logLevel: Logger.Level) {
-        LoggingSystem.bootstrap(StreamLogHandler.standardError)
+
+    init(logMode: LogMode) {
+        switch logMode {
+        case .disabled:
+            LoggingSystem.bootstrap { _ in NoOpLogHandler() }
+        case .enabled(let logFileURL):
+            let logFilePath = logFileURL.path()
+            LoggingSystem.bootstrap { _ -> LogHandler in
+                if let handler = FileLogHandler(filePath: logFilePath) {
+                    return handler
+                }
+                return NoOpLogHandler()
+            }
+        }
         var logger = Logger(label: "me.giginet.ClaudeHookKit")
-        logger.logLevel = logLevel
+        switch logMode {
+        case .disabled:
+            logger.logLevel = .critical
+        case .enabled:
+            logger.logLevel = .debug
+        }
         self.logger = logger
     }
     
@@ -97,8 +118,8 @@ public struct Context {
 }
 
 extension Hook {
-    public func run(isVerbose: Bool = false) throws {
-        let executor = HookExecutor<Self>(logLevel: isVerbose ? .debug : .info)
+    public func run(logMode: LogMode = .disabled) throws {
+        let executor = HookExecutor<Self>(logMode: logMode)
         try executor.execute(hook: self)
     }
 }
