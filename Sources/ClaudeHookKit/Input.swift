@@ -2,16 +2,16 @@ import Foundation
 
 // MARK: - Permission Mode
 
-public enum PermissionMode: String {
+public enum PermissionMode: String, Decodable {
     case `default`
     case plan
-    case acceptEdits
-    case bypassPermissions
+    case acceptEdits = "accept_edits"
+    case bypassPermissions = "bypass_permissions"
 }
 
 // MARK: - Session Start Source
 
-public enum SessionStartSource: String {
+public enum SessionStartSource: String, Decodable {
     case startup
     case resume
     case clear
@@ -20,7 +20,7 @@ public enum SessionStartSource: String {
 
 // MARK: - Session End Reason
 
-public enum SessionEndReason: String {
+public enum SessionEndReason: String, Decodable {
     case clear
     case logout
     case promptInputExit = "prompt_input_exit"
@@ -29,7 +29,7 @@ public enum SessionEndReason: String {
 
 // MARK: - StdinInput Protocol
 
-public protocol StdinInput {
+public protocol StdinInput: Decodable {
     var sessionID: String { get }
     var transcriptPath: URL { get }
     var cwd: URL { get }
@@ -48,7 +48,7 @@ public struct PreToolUseInput<Input: ToolInput>: StdinInput {
     public var permissionMode: PermissionMode
     public var hookEventName: Event
     public var toolName: String
-    public var toolInput: ToolInput
+    public var toolInput: Input
 }
 
 // MARK: - PostToolUse Input
@@ -63,8 +63,8 @@ public struct PostToolUseInput<Input: ToolInput, Response: ToolResponse>: StdinI
     public var permissionMode: PermissionMode
     public var hookEventName: Event
     public var toolName: String
-    public var toolInput: ToolInput
-    public var toolResponse: ToolResponse
+    public var toolInput: Input
+    public var toolResponse: Response
 }
 
 // MARK: - Notification Input
