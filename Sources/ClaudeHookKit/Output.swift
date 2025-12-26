@@ -17,10 +17,20 @@ public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
     }
 
     public struct HookSpecificOutput: Encodable, Sendable {
-        public var hookEventName: Event
+        public var hookEventName: Event = .preToolUse
         public var permissionDecision: PermissionDecision
         public var permissionDecisionReason: String
-        public var updatedInput: Input
+        public var updatedInput: Input?
+        
+        public init(
+            permissionDecision: PermissionDecision,
+            permissionDecisionReason: String,
+            updatedInput: Input?
+        ) {
+            self.permissionDecision = permissionDecision
+            self.permissionDecisionReason = permissionDecisionReason
+            self.updatedInput = updatedInput
+        }
     }
 
     public var `continue`: Bool?
@@ -50,8 +60,12 @@ public struct PostToolUseOutput: StdoutOutput {
     }
 
     public struct HookSpecificOutput: Encodable, Sendable {
-        public var hookEventName: Event
-        public var additionalContext: String?
+        public var hookEventName: Event = .postToolUse
+        public var additionalContext: String
+        
+        init(additionalContext: String) {
+            self.additionalContext = additionalContext
+        }
     }
 
     public var `continue`: Bool?
@@ -106,8 +120,12 @@ public struct UserPromptSubmitOutput: StdoutOutput {
     }
 
     public struct HookSpecificOutput: Encodable, Sendable {
-        public var hookEventName: Event
+        public var hookEventName: Event = .userPromptSubmit
         public var additionalContext: String?
+        
+        public init(additionalContext: String? = nil) {
+            self.additionalContext = additionalContext
+        }
     }
 
     public var `continue`: Bool?
@@ -197,8 +215,12 @@ public struct SubagentStopOutput: StdoutOutput {
 
 public struct SessionStartOutput: StdoutOutput {
     public struct HookSpecificOutput: Encodable, Sendable {
-        public var hookEventName: Event
+        public var hookEventName: Event = .sessionStart
         public var additionalContext: String?
+        
+        public init(additionalContext: String? = nil) {
+            self.additionalContext = additionalContext
+        }
     }
 
     public var `continue`: Bool?

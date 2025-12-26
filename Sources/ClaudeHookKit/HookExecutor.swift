@@ -2,7 +2,7 @@ import Foundation
 
 private let blockingErrorExitCode: Int32 = 2
 
-public struct HookExecutor<H: Hook> {
+struct HookExecutor<H: Hook> {
     private var jsonDecoder: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -60,5 +60,12 @@ public struct HookExecutor<H: Hook> {
                 exit(exitCode)
             }
         }
+    }
+}
+
+extension Hook {
+    public func run() throws {
+        let executor = HookExecutor<Self>()
+        try executor.execute(hook: self)
     }
 }
