@@ -1,22 +1,22 @@
 import Foundation
 
-public protocol StdoutOutput: Encodable {
+public protocol StdoutOutput: Encodable, Sendable {
     var `continue`: Bool? { get }
     var stopReason: String? { get }
     var suppressOutput: Bool? { get }
     var systemMessage: String? { get }
 }
 
-public protocol UpdatedInput: Encodable { }
+public protocol UpdatedInput: Encodable, Sendable { }
 
 public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
-    public enum PermissionDecision: Encodable {
+    public enum PermissionDecision: Encodable, Sendable {
         case allow
         case deny
         case ask
     }
 
-    public struct HookSpecificOutput: Encodable {
+    public struct HookSpecificOutput: Encodable, Sendable {
         public var hookEventName: Event
         public var permissionDecision: PermissionDecision
         public var permissionDecisionReason: String
@@ -45,11 +45,11 @@ public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
 }
 
 public struct PostToolUseOutput: StdoutOutput {
-    public enum Decision: String, Encodable {
+    public enum Decision: String, Encodable, Sendable {
         case block
     }
 
-    public struct HookSpecificOutput: Encodable {
+    public struct HookSpecificOutput: Encodable, Sendable {
         public var hookEventName: Event
         public var additionalContext: String?
     }
@@ -101,11 +101,11 @@ public struct NotificationOutput: StdoutOutput {
 }
 
 public struct UserPromptSubmitOutput: StdoutOutput {
-    public enum Decision: String, Encodable {
+    public enum Decision: String, Encodable, Sendable {
         case block
     }
 
-    public struct HookSpecificOutput: Encodable {
+    public struct HookSpecificOutput: Encodable, Sendable {
         public var hookEventName: Event
         public var additionalContext: String?
     }
@@ -138,7 +138,7 @@ public struct UserPromptSubmitOutput: StdoutOutput {
 }
 
 public struct StopOutput: StdoutOutput {
-    public enum Decision: String, Encodable {
+    public enum Decision: String, Encodable, Sendable {
         case block
     }
 
@@ -167,7 +167,7 @@ public struct StopOutput: StdoutOutput {
 }
 
 public struct SubagentStopOutput: StdoutOutput {
-    public enum Decision: String, Encodable {
+    public enum Decision: String, Encodable, Sendable {
         case block
     }
 
@@ -196,7 +196,7 @@ public struct SubagentStopOutput: StdoutOutput {
 }
 
 public struct SessionStartOutput: StdoutOutput {
-    public struct HookSpecificOutput: Encodable {
+    public struct HookSpecificOutput: Encodable, Sendable {
         public var hookEventName: Event
         public var additionalContext: String?
     }

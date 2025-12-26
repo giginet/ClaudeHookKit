@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Event: String, Codable {
+public enum Event: String, Codable, Sendable {
     case preToolUse = "PreToolUse"
     case postToolUse = "PostToolUse"
     case notification = "Notification"
