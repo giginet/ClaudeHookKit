@@ -27,19 +27,6 @@ public enum SessionEndReason: String {
     case other
 }
 
-// MARK: - Hook Event Name
-
-public enum HookEvent: String {
-    case preToolUse = "PreToolUse"
-    case postToolUse = "PostToolUse"
-    case notification = "Notification"
-    case userPromptSubmit = "UserPromptSubmit"
-    case stop = "Stop"
-    case subagentStop = "SubagentStop"
-    case sessionStart = "SessionStart"
-    case sessionEnd = "SessionEnd"
-}
-
 // MARK: - StdinInput Protocol
 
 public protocol StdinInput {
@@ -47,7 +34,7 @@ public protocol StdinInput {
     var transcriptPath: URL { get }
     var cwd: URL { get }
     var permissionMode: PermissionMode { get }
-    var hookEventName: HookEvent { get }
+    var hookEventName: Event { get }
 }
 // MARK: - PreToolUse Input
 
@@ -59,7 +46,7 @@ public struct PreToolUseInput<Input: ToolInput>: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var toolName: String
     public var toolInput: ToolInput
 }
@@ -74,7 +61,7 @@ public struct PostToolUseInput<Input: ToolInput, Response: ToolResponse>: StdinI
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var toolName: String
     public var toolInput: ToolInput
     public var toolResponse: ToolResponse
@@ -88,7 +75,7 @@ public struct NotificationInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var message: String
 }
 
@@ -100,7 +87,7 @@ public struct UserPromptSubmitInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var prompt: String
 }
 
@@ -112,7 +99,7 @@ public struct StopInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var stopHookActive: Bool
 }
 
@@ -124,7 +111,7 @@ public struct SubagentStopInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var stopHookActive: Bool
 }
 
@@ -136,7 +123,7 @@ public struct SessionStartInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var source: SessionStartSource
 }
 
@@ -148,6 +135,6 @@ public struct SessionEndInput: StdinInput {
     public var transcriptPath: URL
     public var cwd: URL
     public var permissionMode: PermissionMode
-    public var hookEventName: HookEvent
+    public var hookEventName: Event
     public var reason: SessionEndReason
 }
