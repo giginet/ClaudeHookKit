@@ -20,6 +20,25 @@ ClaudeHookKit provides a type-safe way to implement Claude Code hooks in Swift. 
 
 ## Usage
 
+ClaudeHookKit uses the `@main` attribute to define the entry point. Simply add `@main` to your hook struct and implement the `static func invoke` method:
+
+```swift
+@main
+struct MyHook: NotificationHook {
+    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+        // Your hook logic here
+        return .exitCode(.success)
+    }
+}
+```
+
+The `Hook` protocol extension provides a `static func main()` that handles:
+- Reading JSON input from stdin
+- Decoding input to the appropriate type
+- Calling your `invoke` method
+- Outputting results (exit code or JSON)
+- Error handling
+
 ### Basic Example
 
 Here's a simple example of a `Notification` hook that plays a sound when Claude Code sends a notification:
@@ -28,8 +47,9 @@ Here's a simple example of a `Notification` hook that plays a sound when Claude 
 import ClaudeHookKit
 import Foundation
 
+@main
 struct NotificationSoundPlayer: NotificationHook {
-    func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
         // Play the default system sound
         let task = Process()
         task.executableURL = URL(filePath: "/usr/bin/afplay")
@@ -37,13 +57,6 @@ struct NotificationSoundPlayer: NotificationHook {
         try? task.run()
 
         return .exitCode(.success)
-    }
-}
-
-@main
-struct Main {
-    static func main() throws {
-        try NotificationSoundPlayer().run()
     }
 }
 ```
@@ -60,8 +73,12 @@ struct BashToolInput: ToolInput {
     let description: String
 }
 
+@main
 struct DangerousCommandBlocker: PreToolUseHook {
-    func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+    typealias HookToolInput = BashToolInput
+    typealias HookUpdatedInput = Empty
+
+    static func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
         let dangerousCommands = ["rm -rf", "sudo rm", "mkfs", "> /dev/"]
 
         for dangerous in dangerousCommands {
@@ -81,13 +98,6 @@ struct DangerousCommandBlocker: PreToolUseHook {
         return .exitCode(.success)
     }
 }
-
-@main
-struct Main {
-    static func main() throws {
-        try DangerousCommandBlocker().run()
-    }
-}
 ```
 
 ### Auto-approve Documentation Files
@@ -105,8 +115,12 @@ struct ReadToolInput: ToolInput {
     }
 }
 
+@main
 struct DocumentationAutoApprover: PreToolUseHook {
-    func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+    typealias HookToolInput = ReadToolInput
+    typealias HookUpdatedInput = Empty
+
+    static func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
         let documentationExtensions = [".md", ".mdx", ".txt", ".json"]
 
         // Check if file is a documentation file
@@ -127,13 +141,6 @@ struct DocumentationAutoApprover: PreToolUseHook {
 
         // Let the normal permission flow proceed
         return .exitCode(.success)
-    }
-}
-
-@main
-struct Main {
-    static func main() throws {
-        try DocumentationAutoApprover().run()
     }
 }
 ```
@@ -183,16 +190,10 @@ return .jsonOutput(
 
 ### Debug and Logging
 
-ClaudeHookKit supports file-based logging for debugging. You can check hook inputs easily. By default, logging is disabled.
+You can use the logger in the `Context` to log messages for debugging:
 
 ```swift
-let logURL = URL(filePath: "/path/to/.claude-hook-kit.log")
-try myHook.run(logMode: .enabled(logURL))
-```
-
-
-```swift
-func invoke(input: Input, context: Context) -> HookResult<Output> {
+static func invoke(input: Input, context: Context) -> HookResult<Output> {
     // Log a message
     context.logger.debug("Hook invoked with input: \(input)")
 
@@ -210,7 +211,7 @@ You can also use the standard debug logger of Claude Code. See [Debugging](https
 The `Context` object provides access to environment information:
 
 ```swift
-func invoke(input: Input, context: Context) -> HookResult<Output> {
+static func invoke(input: Input, context: Context) -> HookResult<Output> {
     // Access the project directory
     if let projectDir = context.projectDirectoryPath {
         // ...
