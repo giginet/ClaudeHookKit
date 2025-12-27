@@ -3,8 +3,11 @@ import Logging
 
 private let blockingErrorExitCode: Int32 = 2
 
+/// The logging mode for hook execution.
 public enum LogMode {
+    /// Logging is disabled.
     case disabled
+    /// Logging is enabled, writing to the specified file URL.
     case enabled(URL)
 }
 
@@ -104,13 +107,25 @@ struct HookExecutor<H: Hook> {
     }
 }
 
+/// The execution context provided to hooks.
+///
+/// The context provides access to logging and environment information
+/// during hook execution.
 public struct Context {
+    /// The logger for outputting debug information.
+    ///
+    /// Use this logger instead of `print()` to avoid interfering
+    /// with the hook's JSON output.
     public let logger: Logger
 
     init(logger: Logger) {
         self.logger = logger
     }
 
+    /// The project directory path, if available.
+    ///
+    /// This is read from the `CLAUDE_PROJECT_DIR` environment variable
+    /// set by Claude Code.
     public var projectDirectoryPath: URL? {
         guard let projectDirString = ProcessInfo.processInfo.environment["CLAUDE_PROJECT_DIR"]
         else {
@@ -121,6 +136,15 @@ public struct Context {
 }
 
 extension Hook {
+    /// The entry point for hook execution.
+    ///
+    /// This method is automatically called when using the `@main` attribute
+    /// on your hook struct. It handles:
+    /// - Reading JSON input from stdin
+    /// - Decoding input to the appropriate type
+    /// - Calling your `invoke` method
+    /// - Outputting results (exit code or JSON)
+    /// - Error handling
     public static func main() throws {
         let executor = HookExecutor<Self>(logMode: .disabled)
         do {
