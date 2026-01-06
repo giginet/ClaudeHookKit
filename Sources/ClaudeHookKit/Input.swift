@@ -327,3 +327,31 @@ public struct SessionEndInput: StdinInput {
         case reason
     }
 }
+
+/// The input received for a `PermissionRequest` hook.
+///
+/// Called when Claude Code requests permission for an action.
+/// Use this hook to automatically allow or deny permission requests.
+public struct PermissionRequestInput<Input: ToolInput>: StdinInput {
+    /// The unique identifier for the current session.
+    public var sessionID: UUID
+    /// The path to the conversation transcript file (JSONL format).
+    public var transcriptPath: URL
+    /// The current working directory when the hook is invoked.
+    public var cwd: URL
+    /// The current permission mode of Claude Code.
+    public var permissionMode: PermissionMode
+    /// The name of the hook event (`PermissionRequest`).
+    public var hookEventName: Event
+    /// The tool's input parameters for the permission request.
+    public var toolInput: Input?
+
+    private enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
+        case transcriptPath = "transcript_path"
+        case cwd
+        case permissionMode = "permission_mode"
+        case hookEventName = "hook_event_name"
+        case toolInput = "tool_input"
+    }
+}

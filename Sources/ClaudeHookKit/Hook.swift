@@ -178,6 +178,23 @@ where
 {
 }
 
+/// A hook that is called when a permission is requested.
+///
+/// Use this hook to:
+/// - Automatically allow or deny permission requests
+/// - Modify input parameters before execution
+/// - Implement custom permission logic
+public protocol PermissionRequestHook: Hook
+where
+    Input == PermissionRequestInput<HookToolInput>,
+    Output == PermissionRequestOutput<HookUpdatedInput>
+{
+    /// The type representing the tool's input parameters.
+    associatedtype HookToolInput: ToolInput
+    /// The type for updated input if modifying the permission request input.
+    associatedtype HookUpdatedInput: UpdatedInput
+}
+
 /// An empty type used as a placeholder for unused generic parameters.
 ///
 /// Use this type when a hook doesn't need to provide tool input,
