@@ -607,4 +607,12 @@ public struct PermissionRequestOutput<Input: UpdatedInput>: StdoutOutput {
         self.systemMessage = systemMessage
         self.hookSpecificOutput = hookSpecificOutput
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case `continue`
+        case stopReason = "stop_reason"
+        case suppressOutput = "suppress_output"
+        case systemMessage = "system_message"
+        case hookSpecificOutput = "hook_specific_output"
+    }
 }
