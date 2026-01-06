@@ -43,6 +43,8 @@ public protocol Hook {
     ///   - context: The execution context containing logger and environment information.
     /// - Returns: The result of the hook invocation.
     static func invoke(input: Input, context: Context) -> HookResult<Output>
+
+    static var logMode: LogMode { get }
 }
 
 /// A placeholder type for hooks that don't use tool input.

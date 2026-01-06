@@ -73,6 +73,8 @@ struct HookExecutor<H: Hook> {
             input = try jsonDecoder.decode(H.Input.self, from: payloadData)
         } catch {
             let inputString = String(data: payloadData, encoding: .utf8) ?? "<invalid data>"
+            logger.error("\(error.localizedDescription)")
+            logger.debug("\(inputString)")
             throw Error.invalidInput(error, inputString)
         }
 
@@ -136,6 +138,10 @@ public struct Context {
 }
 
 extension Hook {
+    public static var logMode: LogMode {
+        .disabled
+    }
+
     /// The entry point for hook execution.
     ///
     /// This method is automatically called when using the `@main` attribute
@@ -146,7 +152,7 @@ extension Hook {
     /// - Outputting results (exit code or JSON)
     /// - Error handling
     public static func main() throws {
-        let executor = HookExecutor<Self>(logMode: .disabled)
+        let executor = HookExecutor<Self>(logMode: Self.logMode)
         do {
             try executor.execute()
         } catch let error {
