@@ -9,9 +9,9 @@ public enum PermissionMode: String, Decodable {
     /// Plan mode where Claude Code is planning actions without executing.
     case plan
     /// Mode where file edits are automatically accepted.
-    case acceptEdits = "accept_edits"
+    case acceptEdits
     /// Mode where all permissions are bypassed (dangerous operations allowed).
-    case bypassPermissions = "bypass_permissions"
+    case bypassPermissions
 }
 
 /// The source that triggered a session start.
@@ -343,6 +343,8 @@ public struct PermissionRequestInput<Input: ToolInput>: StdinInput {
     public var permissionMode: PermissionMode
     /// The name of the hook event (`PermissionRequest`).
     public var hookEventName: Event
+    /// The name of the tool being requested.
+    public var toolName: String
     /// The tool's input parameters for the permission request.
     public var toolInput: Input?
 
@@ -352,6 +354,7 @@ public struct PermissionRequestInput<Input: ToolInput>: StdinInput {
         case cwd
         case permissionMode = "permission_mode"
         case hookEventName = "hook_event_name"
+        case toolName = "tool_name"
         case toolInput = "tool_input"
     }
 }

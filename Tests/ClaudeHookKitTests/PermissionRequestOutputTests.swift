@@ -4,7 +4,7 @@ import Testing
 @testable import ClaudeHookKit
 
 @Suite
-struct OutputTests {
+struct PermissionRequestOutputTests {
     // MARK: - Helper
 
     private func encodeToJSON<T: Encodable>(_ value: T) throws -> String {
