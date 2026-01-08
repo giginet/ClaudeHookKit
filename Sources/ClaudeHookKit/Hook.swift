@@ -47,12 +47,6 @@ public protocol Hook {
     static var logMode: LogMode { get }
 }
 
-/// A placeholder type for hooks that don't use tool input.
-public struct NeverToolInput: Decodable {}
-
-/// A placeholder type for hooks that don't use tool response.
-public struct NeverToolResponse: Decodable {}
-
 /// A hook that is called before a tool is executed.
 ///
 /// Use this hook to:
