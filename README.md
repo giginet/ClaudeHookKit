@@ -145,69 +145,6 @@ struct DocumentationAutoApprover: PreToolUseHook {
 }
 ```
 
-### Auto-approve Safe Commands
-
-Here's an example of a `PermissionRequest` hook that auto-approves safe commands and blocks dangerous ones:
-
-```swift
-import ClaudeHookKit
-
-struct BashToolInput: ToolInput {
-    let command: String
-    let description: String
-}
-
-struct BashCommandInput: UpdatedInput {
-    let command: String
-}
-
-@main
-struct SafeCommandAutoApprover: PermissionRequestHook {
-    typealias HookToolInput = BashToolInput
-    typealias HookUpdatedInput = BashCommandInput
-
-    static func invoke(input: PermissionRequestInput<BashToolInput>, context: Context) -> HookResult<PermissionRequestOutput<BashCommandInput>> {
-        guard let toolInput = input.toolInput else {
-            return .exitCode(.success)
-        }
-
-        // Block dangerous commands
-        let dangerousCommands = ["rm -rf", "sudo rm", "mkfs"]
-        for dangerous in dangerousCommands {
-            if toolInput.command.contains(dangerous) {
-                return .jsonOutput(
-                    PermissionRequestOutput(
-                        hookSpecificOutput: .init(
-                            decision: .deny(
-                                message: "Blocked dangerous command: \(dangerous)",
-                                interrupt: true
-                            )
-                        )
-                    )
-                )
-            }
-        }
-
-        // Auto-approve and modify npm commands
-        if toolInput.command.starts(with: "npm run") {
-            return .jsonOutput(
-                PermissionRequestOutput(
-                    suppressOutput: true,
-                    hookSpecificOutput: .init(
-                        decision: .allow(
-                            updatedInput: BashCommandInput(command: "npm run lint")
-                        )
-                    )
-                )
-            )
-        }
-
-        // Let normal permission flow proceed
-        return .exitCode(.success)
-    }
-}
-```
-
 ### Supported Hook Types
 
 ClaudeHookKit supports all Claude Code hook events:
