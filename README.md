@@ -25,7 +25,7 @@ ClaudeHookKit uses the `@main` attribute to define the entry point. Simply add `
 ```swift
 @main
 struct MyHook: NotificationHook {
-    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+    static func invoke(input: NotificationInput, context: Context) async -> HookResult<NotificationOutput> {
         // Your hook logic here
         return .exitCode(.success)
     }
@@ -49,7 +49,7 @@ import Foundation
 
 @main
 struct NotificationSoundPlayer: NotificationHook {
-    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+    static func invoke(input: NotificationInput, context: Context) async -> HookResult<NotificationOutput> {
         // Play the default system sound
         let task = Process()
         task.executableURL = URL(filePath: "/usr/bin/afplay")
@@ -78,7 +78,7 @@ struct DangerousCommandBlocker: PreToolUseHook {
     typealias ToolInput = BashToolInput
     typealias UpdatedInput = Empty
 
-    static func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+    static func invoke(input: PreToolUseInput<BashToolInput>, context: Context) async -> HookResult<PreToolUseOutput<Empty>> {
         guard let toolInput = input.toolInput else {
             return .exitCode(.success)
         }
@@ -124,7 +124,7 @@ struct DocumentationAutoApprover: PreToolUseHook {
     typealias ToolInput = ReadToolInput
     typealias UpdatedInput = Empty
 
-    static func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+    static func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) async -> HookResult<PreToolUseOutput<Empty>> {
         guard let toolInput = input.toolInput else {
             return .exitCode(.success)
         }
@@ -202,7 +202,7 @@ return .jsonOutput(
 You can use the logger in the `Context` to log messages for debugging:
 
 ```swift
-static func invoke(input: Input, context: Context) -> HookResult<Output> {
+static func invoke(input: Input, context: Context) async -> HookResult<Output> {
     // Log a message
     context.logger.debug("Hook invoked with input: \(input)")
 
@@ -224,7 +224,7 @@ struct MyHook: NotificationHook {
         .enabled(URL(filePath: "/tmp/my-hook.log"))
     }
 
-    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+    static func invoke(input: NotificationInput, context: Context) async -> HookResult<NotificationOutput> {
         context.logger.debug("Hook invoked")
         return .exitCode(.success)
     }
@@ -242,7 +242,7 @@ You can also use the standard debug logger of Claude Code. See [Debugging](https
 The `Context` object provides access to environment information:
 
 ```swift
-static func invoke(input: Input, context: Context) -> HookResult<Output> {
+static func invoke(input: Input, context: Context) async -> HookResult<Output> {
     // Access the project directory
     if let projectDir = context.projectDirectoryPath {
         // ...
