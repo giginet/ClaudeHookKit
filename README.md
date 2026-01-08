@@ -61,28 +61,32 @@ struct NotificationSoundPlayer: NotificationHook {
 }
 ```
 
-### Use ToolInput struct
+### Use Decodable ToolInput
 
-You can define custom `ToolInput` structs to represent the input for specific tools. Here's an example of a hook that blocks dangerous bash commands:
+You can define custom `Decodable` structs to represent the input for specific tools. Here's an example of a hook that blocks dangerous bash commands:
 
 ```swift
 import ClaudeHookKit
 
-struct BashToolInput: ToolInput {
+struct BashToolInput: Decodable {
     let command: String
     let description: String
 }
 
 @main
 struct DangerousCommandBlocker: PreToolUseHook {
-    typealias HookToolInput = BashToolInput
-    typealias HookUpdatedInput = Empty
+    typealias ToolInput = BashToolInput
+    typealias UpdatedInput = Empty
 
     static func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+        guard let toolInput = input.toolInput else {
+            return .exitCode(.success)
+        }
+
         let dangerousCommands = ["rm -rf", "sudo rm", "mkfs", "> /dev/"]
 
         for dangerous in dangerousCommands {
-            if input.toolInput.command.contains(dangerous) {
+            if toolInput.command.contains(dangerous) {
                 return .jsonOutput(
                     PreToolUseOutput(
                         hookSpecificOutput: .init(
@@ -107,7 +111,7 @@ Here's an example of a `PreToolUse` hook that auto-approves Read tool calls for 
 ```swift
 import ClaudeHookKit
 
-struct ReadToolInput: ToolInput {
+struct ReadToolInput: Decodable {
     let filePath: String
 
     enum CodingKeys: String, CodingKey {
@@ -117,15 +121,19 @@ struct ReadToolInput: ToolInput {
 
 @main
 struct DocumentationAutoApprover: PreToolUseHook {
-    typealias HookToolInput = ReadToolInput
-    typealias HookUpdatedInput = Empty
+    typealias ToolInput = ReadToolInput
+    typealias UpdatedInput = Empty
 
     static func invoke(input: PreToolUseInput<ReadToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
+        guard let toolInput = input.toolInput else {
+            return .exitCode(.success)
+        }
+
         let documentationExtensions = [".md", ".mdx", ".txt", ".json"]
 
         // Check if file is a documentation file
         for ext in documentationExtensions {
-            if input.toolInput.filePath.hasSuffix(ext) {
+            if toolInput.filePath.hasSuffix(ext) {
                 return .jsonOutput(
                     PreToolUseOutput(
                         suppressOutput: true,
@@ -170,7 +178,7 @@ Hooks can return two types of results. See [Hook Output](https://code.claude.com
 ```swift
 return .exitCode(.success)           // Exit with success (exit code 0)
 return .exitCode(.blockingError)     // Block the action (exit code 2)
-return .exitCode(.nonBlockingError(1)) // Non-blocking error with custom exit code
+return .exitCode(.nonBlockingError(exitCode: 1)) // Non-blocking error with custom exit code
 ```
 
 #### JSON Output Results

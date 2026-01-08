@@ -7,7 +7,7 @@ import Testing
 struct PermissionRequestInputTests {
     @Test
     func parsePermissionRequestInput() throws {
-        struct BashToolInput: ToolInput {
+        struct BashToolInput: Decodable {
             let command: String
             let description: String
         }
@@ -47,7 +47,7 @@ struct PermissionRequestInputTests {
 
     @Test
     func parsePermissionRequestInputWithComplexCommand() throws {
-        struct BashToolInput: ToolInput {
+        struct BashToolInput: Decodable {
             let command: String
             let description: String
         }

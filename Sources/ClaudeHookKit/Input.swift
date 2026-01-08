@@ -62,25 +62,11 @@ public protocol StdinInput: Decodable {
     var hookEventName: Event { get }
 }
 
-/// A protocol for types that represent tool input parameters.
-///
-/// Implement this protocol to define the structure of a specific tool's input.
-/// The structure should match the JSON schema of the tool's `tool_input` field.
-///
-/// ## Example
-/// ```swift
-/// struct BashToolInput: ToolInput {
-///     let command: String
-///     let description: String
-/// }
-/// ```
-public protocol ToolInput: Decodable {}
-
 /// The input received for a `PreToolUse` hook.
 ///
 /// Called before a tool is executed. Use this hook for validation,
 /// permission control, or input modification.
-public struct PreToolUseInput<Input: ToolInput>: StdinInput {
+public struct PreToolUseInput<Input: Decodable>: StdinInput {
     /// The unique identifier for the current session.
     public var sessionID: UUID
     /// The path to the conversation transcript file (JSONL format).
@@ -109,17 +95,11 @@ public struct PreToolUseInput<Input: ToolInput>: StdinInput {
     }
 }
 
-/// A protocol for types that represent tool response data.
-///
-/// Implement this protocol to define the structure of a tool's response
-/// for use in `PostToolUse` hooks.
-public protocol ToolResponse: Decodable {}
-
 /// The input received for a `PostToolUse` hook.
 ///
 /// Called after a tool is executed. Use this hook for logging,
 /// auditing, or adding additional context based on results.
-public struct PostToolUseInput<Input: ToolInput, Response: ToolResponse>: StdinInput {
+public struct PostToolUseInput<Input: Decodable, Response: Decodable>: StdinInput {
     /// The unique identifier for the current session.
     public var sessionID: UUID
     /// The path to the conversation transcript file (JSONL format).
@@ -332,7 +312,7 @@ public struct SessionEndInput: StdinInput {
 ///
 /// Called when Claude Code requests permission for an action.
 /// Use this hook to automatically allow or deny permission requests.
-public struct PermissionRequestInput<Input: ToolInput>: StdinInput {
+public struct PermissionRequestInput<Input: Decodable>: StdinInput {
     /// The unique identifier for the current session.
     public var sessionID: UUID
     /// The path to the conversation transcript file (JSONL format).

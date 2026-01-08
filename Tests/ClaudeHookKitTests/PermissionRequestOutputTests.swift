@@ -18,7 +18,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithAllowDecision() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             hookSpecificOutput: .init(
@@ -43,7 +43,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithAllowAndUpdatedInput() throws {
-        struct TestUpdatedInput: UpdatedInput {
+        struct TestUpdatedInput: Encodable {
             let command: String
         }
 
@@ -75,7 +75,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithDenyDecision() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             hookSpecificOutput: .init(
@@ -100,7 +100,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithDenyMessageAndInterrupt() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             hookSpecificOutput: .init(
@@ -130,7 +130,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithDenyMessageOnly() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             hookSpecificOutput: .init(
@@ -156,7 +156,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithDenyInterruptOnly() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             hookSpecificOutput: .init(
@@ -182,7 +182,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithCommonFields() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             continue: false,
@@ -216,7 +216,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputWithoutHookSpecificOutput() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             systemMessage: "Just a notification"
@@ -234,7 +234,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputComplexUpdatedInput() throws {
-        struct ComplexUpdatedInput: UpdatedInput {
+        struct ComplexUpdatedInput: Encodable {
             let command: String
             let arguments: [String]
             let environment: [String: String]
@@ -281,7 +281,7 @@ struct PermissionRequestOutputTests {
 
     @Test
     func encodePermissionRequestOutputAllCommonFieldsSet() throws {
-        struct EmptyInput: UpdatedInput {}
+        struct EmptyInput: Encodable {}
 
         let output = PermissionRequestOutput<EmptyInput>(
             continue: true,
