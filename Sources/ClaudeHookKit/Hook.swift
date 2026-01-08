@@ -48,10 +48,10 @@ public protocol Hook {
 }
 
 /// A placeholder type for hooks that don't use tool input.
-public struct NeverToolInput: ToolInput {}
+public struct NeverToolInput: ToolInputProtocol {}
 
 /// A placeholder type for hooks that don't use tool response.
-public struct NeverToolResponse: ToolResponse {}
+public struct NeverToolResponse: ToolResponseProtocol {}
 
 /// A hook that is called before a tool is executed.
 ///
@@ -64,8 +64,8 @@ public struct NeverToolResponse: ToolResponse {}
 /// ```swift
 /// @main
 /// struct MyPreToolHook: PreToolUseHook {
-///     typealias HookToolInput = BashToolInput
-///     typealias HookUpdatedInput = Empty
+///     typealias ToolInput = BashToolInput
+///     typealias UpdatedInput = Empty
 ///
 ///     static func invoke(input: PreToolUseInput<BashToolInput>, context: Context) -> HookResult<PreToolUseOutput<Empty>> {
 ///         // Your logic here
@@ -75,13 +75,13 @@ public struct NeverToolResponse: ToolResponse {}
 /// ```
 public protocol PreToolUseHook: Hook
 where
-    Input == PreToolUseInput<HookToolInput>,
-    Output == PreToolUseOutput<HookUpdatedInput>
+    Input == PreToolUseInput<ToolInput>,
+    Output == PreToolUseOutput<UpdatedInput>
 {
     /// The type representing the tool's input parameters.
-    associatedtype HookToolInput: ToolInput
+    associatedtype ToolInput: ToolInputProtocol
     /// The type for updated input if modifying the tool input.
-    associatedtype HookUpdatedInput: UpdatedInput
+    associatedtype UpdatedInput: UpdatedInputProtocol
 }
 
 /// A hook that is called after a tool is executed.
@@ -92,13 +92,13 @@ where
 /// - Log or audit tool usage
 public protocol PostToolUseHook: Hook
 where
-    Input == PostToolUseInput<HookToolInput, HookToolResponse>,
+    Input == PostToolUseInput<ToolInput, ToolResponse>,
     Output == PostToolUseOutput
 {
     /// The type representing the tool's input parameters.
-    associatedtype HookToolInput: ToolInput
+    associatedtype ToolInput: ToolInputProtocol
     /// The type representing the tool's response.
-    associatedtype HookToolResponse: ToolResponse
+    associatedtype ToolResponse: ToolResponseProtocol
 }
 
 /// A hook that is called when Claude Code sends a notification.
@@ -186,18 +186,18 @@ where
 /// - Implement custom permission logic
 public protocol PermissionRequestHook: Hook
 where
-    Input == PermissionRequestInput<HookToolInput>,
-    Output == PermissionRequestOutput<HookUpdatedInput>
+    Input == PermissionRequestInput<ToolInput>,
+    Output == PermissionRequestOutput<UpdatedInput>
 {
     /// The type representing the tool's input parameters.
-    associatedtype HookToolInput: ToolInput
+    associatedtype ToolInput: ToolInputProtocol
     /// The type for updated input if modifying the permission request input.
-    associatedtype HookUpdatedInput: UpdatedInput
+    associatedtype UpdatedInput: UpdatedInputProtocol
 }
 
 /// An empty type used as a placeholder for unused generic parameters.
 ///
 /// Use this type when a hook doesn't need to provide tool input,
 /// tool response, or updated input.
-public struct Empty: ToolInput, ToolResponse, UpdatedInput {
+public struct Empty: ToolInputProtocol, ToolResponseProtocol, UpdatedInputProtocol {
 }

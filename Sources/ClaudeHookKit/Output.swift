@@ -27,13 +27,13 @@ public protocol StdoutOutput: Encodable, Sendable {
 ///
 /// Implement this protocol to define modified tool input parameters
 /// for use with `PreToolUse` hooks' `updatedInput` feature.
-public protocol UpdatedInput: Encodable, Sendable {}
+public protocol UpdatedInputProtocol: Encodable, Sendable {}
 
 /// The output returned from a `PreToolUse` hook.
 ///
 /// Use this output to control whether a tool execution should proceed,
 /// and optionally modify the tool input before execution.
-public struct PreToolUseOutput<Input: UpdatedInput>: StdoutOutput {
+public struct PreToolUseOutput<Input: UpdatedInputProtocol>: StdoutOutput {
     /// The permission decision for a tool execution.
     public enum PermissionDecision: String, Encodable, Sendable {
         /// Allow the tool to execute, bypassing the normal permission system.
@@ -515,7 +515,7 @@ public struct SessionEndOutput: StdoutOutput {
 ///
 /// Use this output to automatically allow or deny permission requests
 /// and optionally modify the input parameters.
-public struct PermissionRequestOutput<Input: UpdatedInput>: StdoutOutput {
+public struct PermissionRequestOutput<Input: UpdatedInputProtocol>: StdoutOutput {
     /// The decision for a permission request.
     public enum PermissionDecision: Sendable {
         /// Allow the action to proceed.
