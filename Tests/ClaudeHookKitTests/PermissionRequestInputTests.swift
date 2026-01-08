@@ -39,7 +39,7 @@ struct PermissionRequestInputTests {
         )
         #expect(input.cwd.path() == "/home/user/projects/my-project")
         #expect(input.permissionMode == .acceptEdits)
-        #expect(input.hookEventName == .PermissionRequest)
+        #expect(input.hookEventName == .permissionRequest)
         #expect(input.toolName == "Bash")
         #expect(input.toolInput?.command == "echo 'Hello World'")
         #expect(input.toolInput?.description == "Print greeting message")

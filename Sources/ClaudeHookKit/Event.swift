@@ -22,5 +22,5 @@ public enum Event: String, Codable, Sendable {
     /// Called when a session ends.
     case sessionEnd = "SessionEnd"
     /// Called when a permission is requested.
-    case PermissionRequest = "PermissionRequest"
+    case permissionRequest = "PermissionRequest"
 }

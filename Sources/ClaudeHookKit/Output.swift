@@ -534,7 +534,7 @@ public struct PermissionRequestOutput<Input: UpdatedInput>: StdoutOutput {
     /// The hook-specific output for `PermissionRequest` hooks.
     public struct HookSpecificOutput: Encodable, Sendable {
         /// The name of the hook event.
-        public var hookEventName: Event = .PermissionRequest
+        public var hookEventName: Event = .permissionRequest
         /// The decision for this permission request.
         public var decision: PermissionDecision
 
