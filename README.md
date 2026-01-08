@@ -61,14 +61,14 @@ struct NotificationSoundPlayer: NotificationHook {
 }
 ```
 
-### Use ToolInputProtocol
+### Use Decodable ToolInput
 
-You can define custom `ToolInputProtocol` structs to represent the input for specific tools. Here's an example of a hook that blocks dangerous bash commands:
+You can define custom `Decodable` structs to represent the input for specific tools. Here's an example of a hook that blocks dangerous bash commands:
 
 ```swift
 import ClaudeHookKit
 
-struct BashToolInput: ToolInputProtocol {
+struct BashToolInput: Decodable {
     let command: String
     let description: String
 }
@@ -107,7 +107,7 @@ Here's an example of a `PreToolUse` hook that auto-approves Read tool calls for 
 ```swift
 import ClaudeHookKit
 
-struct ReadToolInput: ToolInputProtocol {
+struct ReadToolInput: Decodable {
     let filePath: String
 
     enum CodingKeys: String, CodingKey {

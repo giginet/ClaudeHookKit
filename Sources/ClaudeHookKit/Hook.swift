@@ -48,10 +48,10 @@ public protocol Hook {
 }
 
 /// A placeholder type for hooks that don't use tool input.
-public struct NeverToolInput: ToolInputProtocol {}
+public struct NeverToolInput: Decodable {}
 
 /// A placeholder type for hooks that don't use tool response.
-public struct NeverToolResponse: ToolResponseProtocol {}
+public struct NeverToolResponse: Decodable {}
 
 /// A hook that is called before a tool is executed.
 ///
@@ -79,9 +79,9 @@ where
     Output == PreToolUseOutput<UpdatedInput>
 {
     /// The type representing the tool's input parameters.
-    associatedtype ToolInput: ToolInputProtocol
+    associatedtype ToolInput: Decodable
     /// The type for updated input if modifying the tool input.
-    associatedtype UpdatedInput: UpdatedInputProtocol
+    associatedtype UpdatedInput: Encodable & Sendable
 }
 
 /// A hook that is called after a tool is executed.
@@ -96,9 +96,9 @@ where
     Output == PostToolUseOutput
 {
     /// The type representing the tool's input parameters.
-    associatedtype ToolInput: ToolInputProtocol
+    associatedtype ToolInput: Decodable
     /// The type representing the tool's response.
-    associatedtype ToolResponse: ToolResponseProtocol
+    associatedtype ToolResponse: Decodable
 }
 
 /// A hook that is called when Claude Code sends a notification.
@@ -190,14 +190,14 @@ where
     Output == PermissionRequestOutput<UpdatedInput>
 {
     /// The type representing the tool's input parameters.
-    associatedtype ToolInput: ToolInputProtocol
+    associatedtype ToolInput: Decodable
     /// The type for updated input if modifying the permission request input.
-    associatedtype UpdatedInput: UpdatedInputProtocol
+    associatedtype UpdatedInput: Encodable & Sendable
 }
 
 /// An empty type used as a placeholder for unused generic parameters.
 ///
 /// Use this type when a hook doesn't need to provide tool input,
 /// tool response, or updated input.
-public struct Empty: ToolInputProtocol, ToolResponseProtocol, UpdatedInputProtocol {
+public struct Empty: Codable, Sendable {
 }
