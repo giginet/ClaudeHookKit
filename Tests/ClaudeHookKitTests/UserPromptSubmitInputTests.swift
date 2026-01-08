@@ -4,7 +4,7 @@ import Testing
 @testable import ClaudeHookKit
 
 @Suite
-struct InputTests {
+struct UserPromptSubmitInputTests {
     @Test
     func parseUserPromptSubmitInput() throws {
         let json = """

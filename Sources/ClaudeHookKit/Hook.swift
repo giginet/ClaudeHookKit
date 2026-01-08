@@ -43,6 +43,8 @@ public protocol Hook {
     ///   - context: The execution context containing logger and environment information.
     /// - Returns: The result of the hook invocation.
     static func invoke(input: Input, context: Context) -> HookResult<Output>
+
+    static var logMode: LogMode { get }
 }
 
 /// A placeholder type for hooks that don't use tool input.
@@ -174,6 +176,23 @@ where
     Input == SessionEndInput,
     Output == SessionEndOutput
 {
+}
+
+/// A hook that is called when a permission is requested.
+///
+/// Use this hook to:
+/// - Automatically allow or deny permission requests
+/// - Modify input parameters before execution
+/// - Implement custom permission logic
+public protocol PermissionRequestHook: Hook
+where
+    Input == PermissionRequestInput<HookToolInput>,
+    Output == PermissionRequestOutput<HookUpdatedInput>
+{
+    /// The type representing the tool's input parameters.
+    associatedtype HookToolInput: ToolInput
+    /// The type for updated input if modifying the permission request input.
+    associatedtype HookUpdatedInput: UpdatedInput
 }
 
 /// An empty type used as a placeholder for unused generic parameters.

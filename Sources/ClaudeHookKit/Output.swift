@@ -510,3 +510,109 @@ public struct SessionEndOutput: StdoutOutput {
         self.systemMessage = systemMessage
     }
 }
+
+/// The output returned from a `PermissionRequest` hook.
+///
+/// Use this output to automatically allow or deny permission requests
+/// and optionally modify the input parameters.
+public struct PermissionRequestOutput<Input: UpdatedInput>: StdoutOutput {
+    /// The decision for a permission request.
+    public enum PermissionDecision: Sendable {
+        /// Allow the action to proceed.
+        ///
+        /// - Parameter updatedInput: Modified input parameters to use instead of the original.
+        case allow(updatedInput: Input? = nil)
+
+        /// Deny the action.
+        ///
+        /// - Parameters:
+        ///   - message: The reason for denying, shown to Claude.
+        ///   - interrupt: Whether to stop Claude execution.
+        case deny(message: String? = nil, interrupt: Bool? = nil)
+    }
+
+    /// The hook-specific output for `PermissionRequest` hooks.
+    public struct HookSpecificOutput: Encodable, Sendable {
+        /// The name of the hook event.
+        public var hookEventName: Event = .permissionRequest
+        /// The decision for this permission request.
+        public var decision: PermissionDecision
+
+        /// Creates a new hook-specific output.
+        ///
+        /// - Parameter decision: The permission decision.
+        public init(decision: PermissionDecision) {
+            self.decision = decision
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(hookEventName, forKey: .hookEventName)
+
+            var decisionContainer = container.nestedContainer(
+                keyedBy: DecisionCodingKeys.self, forKey: .decision)
+            switch decision {
+            case .allow(let updatedInput):
+                try decisionContainer.encode("allow", forKey: .behavior)
+                try decisionContainer.encodeIfPresent(updatedInput, forKey: .updatedInput)
+            case .deny(let message, let interrupt):
+                try decisionContainer.encode("deny", forKey: .behavior)
+                try decisionContainer.encodeIfPresent(message, forKey: .message)
+                try decisionContainer.encodeIfPresent(interrupt, forKey: .interrupt)
+            }
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case hookEventName = "hook_event_name"
+            case decision
+        }
+
+        private enum DecisionCodingKeys: String, CodingKey {
+            case behavior
+            case updatedInput = "updated_input"
+            case message
+            case interrupt
+        }
+    }
+
+    /// Whether Claude should continue execution after this hook.
+    public var `continue`: Bool?
+    /// The reason for stopping, shown to the user.
+    public var stopReason: String?
+    /// Whether to hide hook output from the transcript view.
+    public var suppressOutput: Bool?
+    /// An optional warning or context message shown to the user.
+    public var systemMessage: String?
+    /// The hook-specific output containing the permission decision.
+    public var hookSpecificOutput: HookSpecificOutput?
+
+    /// Creates a new permission request output.
+    ///
+    /// - Parameters:
+    ///   - continue: Whether Claude should continue execution.
+    ///   - stopReason: The reason for stopping (shown to user).
+    ///   - suppressOutput: Whether to hide output from transcript.
+    ///   - systemMessage: An optional message shown to the user.
+    ///   - hookSpecificOutput: The permission decision.
+    public init(
+        continue: Bool? = nil,
+        stopReason: String? = nil,
+        suppressOutput: Bool? = nil,
+        systemMessage: String? = nil,
+        hookSpecificOutput: HookSpecificOutput? = nil
+    ) {
+        self.continue = `continue`
+        self.stopReason = stopReason
+        self.suppressOutput = suppressOutput
+        self.systemMessage = systemMessage
+        self.hookSpecificOutput = hookSpecificOutput
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case `continue`
+        case stopReason = "stop_reason"
+        case suppressOutput = "suppress_output"
+        case systemMessage = "system_message"
+        case hookSpecificOutput = "hook_specific_output"
+    }
+}

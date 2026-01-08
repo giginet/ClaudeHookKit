@@ -9,9 +9,9 @@ public enum PermissionMode: String, Decodable {
     /// Plan mode where Claude Code is planning actions without executing.
     case plan
     /// Mode where file edits are automatically accepted.
-    case acceptEdits = "accept_edits"
+    case acceptEdits
     /// Mode where all permissions are bypassed (dangerous operations allowed).
-    case bypassPermissions = "bypass_permissions"
+    case bypassPermissions
 }
 
 /// The source that triggered a session start.
@@ -325,5 +325,36 @@ public struct SessionEndInput: StdinInput {
         case permissionMode = "permission_mode"
         case hookEventName = "hook_event_name"
         case reason
+    }
+}
+
+/// The input received for a `PermissionRequest` hook.
+///
+/// Called when Claude Code requests permission for an action.
+/// Use this hook to automatically allow or deny permission requests.
+public struct PermissionRequestInput<Input: ToolInput>: StdinInput {
+    /// The unique identifier for the current session.
+    public var sessionID: UUID
+    /// The path to the conversation transcript file (JSONL format).
+    public var transcriptPath: URL
+    /// The current working directory when the hook is invoked.
+    public var cwd: URL
+    /// The current permission mode of Claude Code.
+    public var permissionMode: PermissionMode
+    /// The name of the hook event (`PermissionRequest`).
+    public var hookEventName: Event
+    /// The name of the tool being requested.
+    public var toolName: String
+    /// The tool's input parameters for the permission request.
+    public var toolInput: Input?
+
+    private enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
+        case transcriptPath = "transcript_path"
+        case cwd
+        case permissionMode = "permission_mode"
+        case hookEventName = "hook_event_name"
+        case toolName = "tool_name"
+        case toolInput = "tool_input"
     }
 }

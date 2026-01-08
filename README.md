@@ -159,6 +159,7 @@ ClaudeHookKit supports all Claude Code hook events:
 | `SubagentStopHook` | `SubagentStop` | Called when a subagent stops |
 | `SessionStartHook` | `SessionStart` | Called when a session starts |
 | `SessionEndHook` | `SessionEnd` | Called when a session ends |
+| `PermissionRequestHook` | `PermissionRequest` | Called when a permission is requested |
 
 ### Hook Results
 
@@ -203,6 +204,28 @@ static func invoke(input: Input, context: Context) -> HookResult<Output> {
 
 > [!WARNING]
 > Do not use `print` to output logs, as it may interfere with the hook's JSON output. Use the provided logger instead.
+
+#### Configuring Log Output
+
+By default, logging is disabled. To enable logging to a file, override the `logMode` property in your hook:
+
+```swift
+@main
+struct MyHook: NotificationHook {
+    static var logMode: LogMode {
+        .enabled(URL(filePath: "/tmp/my-hook.log"))
+    }
+
+    static func invoke(input: NotificationInput, context: Context) -> HookResult<NotificationOutput> {
+        context.logger.debug("Hook invoked")
+        return .exitCode(.success)
+    }
+}
+```
+
+The `LogMode` enum has two cases:
+- `.disabled` - Logging is disabled (default)
+- `.enabled(URL)` - Logging is enabled, writing to the specified file URL
 
 You can also use the standard debug logger of Claude Code. See [Debugging](https://code.claude.com/docs/en/hooks#debugging) section of the official documentation.
 
