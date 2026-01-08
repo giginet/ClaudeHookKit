@@ -54,7 +54,7 @@ struct HookExecutor<H: Hook> {
         self.logger = logger
     }
 
-    func execute() throws {
+    func execute() async throws {
         let inputHandler = FileHandle.standardInput
         let isTTY = isatty(STDIN_FILENO) != 0
         guard !isTTY else {
@@ -79,7 +79,7 @@ struct HookExecutor<H: Hook> {
         }
 
         let context = Context(logger: logger)
-        let outputResult = H.invoke(input: input, context: context)
+        let outputResult = await H.invoke(input: input, context: context)
         try handleHookResult(outputResult, logger: logger)
     }
 
@@ -151,10 +151,10 @@ extension Hook {
     /// - Calling your `invoke` method
     /// - Outputting results (exit code or JSON)
     /// - Error handling
-    public static func main() throws {
+    public static func main() async throws {
         let executor = HookExecutor<Self>(logMode: Self.logMode)
         do {
-            try executor.execute()
+            try await executor.execute()
         } catch let error {
             print(error.localizedDescription)
             exit(EXIT_FAILURE)

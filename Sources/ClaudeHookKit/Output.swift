@@ -140,7 +140,7 @@ public struct PostToolUseOutput: StdoutOutput {
         /// Creates a new hook-specific output.
         ///
         /// - Parameter additionalContext: Context to add based on tool result.
-        init(additionalContext: String) {
+        public init(additionalContext: String) {
             self.additionalContext = additionalContext
         }
     }

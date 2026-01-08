@@ -42,7 +42,7 @@ public protocol Hook {
     ///   - input: The input data from Claude Code.
     ///   - context: The execution context containing logger and environment information.
     /// - Returns: The result of the hook invocation.
-    static func invoke(input: Input, context: Context) -> HookResult<Output>
+    static func invoke(input: Input, context: Context) async -> HookResult<Output>
 
     static var logMode: LogMode { get }
 }
